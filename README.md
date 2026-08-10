@@ -1,7 +1,7 @@
 # Kombucha
 
 ## Summary
-Kombucha is a graphical all in one tool for setting up and executing synthetic data generation pipelines from LLMs. The project's aim is to provide a simple and easy interface to accelerate AI development. It is written in Python3 and utilizes the Tkinter framework as a simple frontend. The project prioritizes flexibility, meaning that support for multiple backends is expected.
+Kombucha is a graphical all in one tool for setting up and executing synthetic data generation pipelines from LLMs. The project's aim is to provide a simple and easy interface to accelerate AI development. It is written in Python3 and utilizes the Tkinter framework as a simple frontend. The project prioritizes flexibility, meaning that support for multiple backends is a priority.
 
 ### Can I contribute?
 Of course! We are looking for active contributors. Make sure to discuss new features with the maintainer before trying to create a pull request. Your name will the included automatically by GitHub in the CONTRIBUTORS.md file. The project is MIT licensed.
