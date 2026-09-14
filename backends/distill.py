@@ -1,4 +1,4 @@
-import importlib, os, types, subprocess, json, threading
+import importlib, os, types, json, threading
 from tkinter import messagebox
 
 def load(library) -> types.ModuleType:
