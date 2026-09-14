@@ -1,6 +1,7 @@
 import importlib, os, types, json, threading
 from tkinter import messagebox
 
+# Define function to help with relative imports
 def load(library) -> types.ModuleType:
     current = os.getcwd()
     os.chdir(os.path.dirname(os.path.realpath(__file__)))
@@ -8,6 +9,7 @@ def load(library) -> types.ModuleType:
     os.chdir(current)
     return ans
 
+# Import the packages using the safe relative import function
 lmstudio, nvidia, ollama = load("backends.wrappers.lmstudio"), load("backends.wrappers.nvidia"), load("backends.wrappers.ollama")
 
 def distill(backend: str, format: str, model: str, api_key: str, output_dir: str, steps: int, instances: int) -> None:
@@ -15,14 +17,17 @@ def distill(backend: str, format: str, model: str, api_key: str, output_dir: str
 
     generator: None
 
+    # Define the model object if local model is detected
     if backend == "Ollama":
         generator = ollama.ollamamodel()
     elif backend =="LMStudio":
         generator = lmstudio.lmsmodel()
 
+    # Load model (not dependent on backend)
     generator.assign(model)
     generator.load()
 
+    # Define a unified prompt function for simplicity later on
     def _prompt(text: str) -> str:
 
         ans: str = ""
@@ -38,6 +43,7 @@ def distill(backend: str, format: str, model: str, api_key: str, output_dir: str
 
         return ans
 
+    # Define the sibling thread worker function.
     def _sibling():
         with open("data.json", "a") as file:
             for x in range(int(steps/instances)+1):
@@ -71,11 +77,14 @@ def distill(backend: str, format: str, model: str, api_key: str, output_dir: str
 
                 file.flush()
 
+    # Reset threads list.
     threads = []
 
+    # Write initial JSON formatting.
     with open("data.json", "w") as file:
         file.write("{\n    \"messages\": [\n")
 
+    # Start the threads.
     for x in range(instances):
         t = threading.Thread(target=_sibling)
         threads.append(t)
@@ -86,9 +95,11 @@ def distill(backend: str, format: str, model: str, api_key: str, output_dir: str
     for t in threads:
         t.join()
 
+    # Write final JSON formatting.
     with open("data.json", "a") as file:
         file.write("    ]\n}")
 
+    # Unload the model class if the model is local.
     if generator:
         generator.unload()
 
