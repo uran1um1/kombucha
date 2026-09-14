@@ -1,24 +1,35 @@
-from openai import OpenAI
+import subprocess
 
-def prompt(text: str, model: str) -> str:
-    client = OpenAI(
-        base_url = "http://localhost:11434/v1",
-        api_key = "ollama"
-    )
+class ollamamodel():
+    def __init__(self):
+        self.name = ""
+        self.status = False
 
-    completion = client.chat.completions.create(
-        model = model,
-        messages = [{"role": "user", "content": text}],
-        temperature = 1,
-        max_tokens = 8192,
-        stream = False
-    )
+        if "ollama version is" not in str(subprocess.run(["ollama", "--version"], text=True, capture_output=True).stdout).strip():
+            raise ValueError("Ollama is not installed.")
+    
+    def load(self):
+        self.status = True
 
-    result: str = ""
+    def unload(self):
+        if self.name in str(subprocess.run(["ollama", "ps"], text=True, capture_output=True).stdout).strip():
 
-    reasoning = getattr(completion.choices[0].message, "reasoning_content", None)
-    if reasoning:
-        result = f"<think>\n{reasoning}\n</think>"
-    result = f"{result}\n{completion.choices[0].message.content}"
+            control = subprocess.run(["ollama", "stop", self.name], text=True, capture_output=True)
 
-    return result
+            if "couldn't find model" in str(control.stderr).strip():
+                raise ValueError(f"Failed to unload \"{self.name}\" as it is not loaded.")
+
+            self.status = False
+
+    def assign(self, name: str) -> None:
+
+        if name not in str(subprocess.run(["ollama", "list"], text=True, capture_output=True).stdout).strip():
+            raise ValueError(f"Model \"{self.name}\" not installed in system.")
+
+        self.name = name
+
+    def prompt(self, text: str) -> str:
+        if self.status == True:
+            response = str(subprocess.run(["ollama", "run", self.name, f"\"{text}\""], text=True, capture_output=True).stdout).strip()
+
+        return response

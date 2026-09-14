@@ -13,14 +13,22 @@ lmstudio, nvidia, ollama = load("backends.wrappers.lmstudio"), load("backends.wr
 def distill(backend: str, format: str, model: str, api_key: str, output_dir: str, steps: int, instances: int) -> None:
     os.chdir(output_dir)
 
+    generator: None
+
+    if backend == "Ollama":
+        generator = ollama.ollamamodel()
+    elif backend =="LMStudio":
+        generator = lmstudio.lmsmodel()
+
+    generator.assign(model)
+    generator.load()
+
     def _prompt(text: str) -> str:
 
         ans: str = ""
 
-        if backend == "Ollama":
-            ans = ollama.prompt(text, model)
-        elif backend =="LMStudio":
-            ans = lmstudio.prompt(text, model)
+        if backend in ["Ollama", "LMStudio"]:
+            ans = generator.prompt(text)
         elif backend == "NIM":
             ans = nvidia.prompt(text, api_key, model)
 
@@ -80,6 +88,9 @@ def distill(backend: str, format: str, model: str, api_key: str, output_dir: str
 
     with open("data.json", "a") as file:
         file.write("    ]\n}")
+
+    if generator:
+        generator.unload()
 
     with open("data.json", "r") as file:
         data = file.read()
